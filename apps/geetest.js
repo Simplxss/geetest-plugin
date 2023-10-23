@@ -53,7 +53,7 @@ export class bbsVerificationHandler extends plugin {
     if (!verify) verify = await this.mannualVerify(this.e, create.data)
     if (!verify) return false
 
-    res = await this.mysApi.getData("verifyVerification", verify)
+    let submit = await this.mysApi.getData("verifyVerification", verify)
     if (!submit || submit.retcode !== 0) return false
     this.e.isVerify = true
     return true
@@ -68,7 +68,7 @@ export class bbsVerificationHandler extends plugin {
       logger.error(`[validate][${e.uid}] ${response.status} ${response.statusText}`)
       return false
     }
-    res = await response.json()
+    let res = await response.json()
     if (res?.data?.validate) {
       logger.mark(`[米游社验证成功][${e.uid}] 消耗token一次`)
     }
@@ -102,55 +102,22 @@ export class bbsVerificationHandler extends plugin {
     return false
   }
 
-  getUrlMap = (data = {}) => {
-    let host, hostRecord
-    if (['cn_gf01', 'cn_qd01', 'prod_gf_cn', 'prod_qd_cn'].includes(this.server)) {
-      host = 'https://api-takumi.mihoyo.com/'
-      hostRecord = 'https://api-takumi-record.mihoyo.com/'
-    } else if (['os_usa', 'os_euro', 'os_asia', 'os_cht'].includes(this.server)) {
-      host = 'https://api-os-takumi.mihoyo.com/'
-      hostRecord = 'https://bbs-api-os.mihoyo.com/'
-    }
+  getUrl (type, data = {}) {
     let urlMap = {
-      genshin: {
-        /** 过验证码 */
-        createVerification: {
-          url: `${hostRecord}game_record/app/card/wapi/createVerification`,
-          query: 'is_high=true'
-        },
-        verifyVerification: {
-          url: `${hostRecord}game_record/app/card/wapi/verifyVerification`,
-          body: {
-            "geetest_challenge": data.challenge,
-            "geetest_validate": data.validate,
-            "geetest_seccode": `${data.validate}|jordan`
-          },
-        },
+      ...this.apiTool.getUrlMap({ ...data, deviceId: this.device }),
+      createVerification: {
+        url: 'https://api-takumi-record.mihoyo.com/game_record/app/card/wapi/createVerification',
+        query: 'is_high=true'
       },
-      honkaisr: {
-        /** 过验证码 */
-        createVerification: {
-          url: `${hostRecord}game_record/app/card/wapi/createVerification`,
-          query: 'is_high=true'
-        },
-        verifyVerification: {
-          url: `${hostRecord}game_record/app/card/wapi/verifyVerification`,
-          headers: {
-            'x-rpc-challenge_game': '6'
-          },
-          body: {
-            "geetest_challenge": data.challenge,
-            "geetest_validate": data.validate,
-            "geetest_seccode": `${data.validate}|jordan`
-          },
+      verifyVerification: {
+        url: 'https://api-takumi-record.mihoyo.com/game_record/app/card/wapi/verifyVerification',
+        body: {
+          "geetest_challenge": data.challenge,
+          "geetest_validate": data.validate,
+          "geetest_seccode": `${data.validate}|jordan`
         },
       }
     }
-    return urlMap[this.game]
-  }
-
-  getUrl (type, data = {}) {
-    let urlMap = this.getUrlMap({ ...data, deviceId: this.device })
     if (!urlMap[type]) return false
 
     let { url, query = '', body = '' } = urlMap[type]
