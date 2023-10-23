@@ -17,7 +17,6 @@ export class bbsVerificationHandler extends plugin {
     if (!this.cfg.autoAddress) this.cfg.autoAddress = '';
     if (!this.cfg.manualAddress) this.cfg.manualAddress = '';
     if (!this.cfg.blackList) this.cfg.blackList = [];
-    xxCfg.saveYaml("config", this.cfg);
   }
 
   async mysReqErrHandler(e, options, reject) {
@@ -36,7 +35,7 @@ export class bbsVerificationHandler extends plugin {
     let self = new bbsVerificationHandler()
     self.e = e
     self.mysApi = mysApi
-    self.mysApi.getUrl = (...args) => self.getUrl.call(self.mysApi, ...args)
+    self.mysApi.getUrl = (...args) => this.getUrl.call(self.mysApi, ...args)
 
     let verify = await self.bbsVerification()
     if (!verify) logger.error(`[米游社验证失败][uid:${e.uid || mysApi.uid}][qq:${e.user_id}]`)
@@ -101,5 +100,66 @@ export class bbsVerificationHandler extends plugin {
     }
 
     return false
+  }
+
+  getUrlMap = (data = {}) => {
+    let host, hostRecord
+    if (['cn_gf01', 'cn_qd01', 'prod_gf_cn', 'prod_qd_cn'].includes(this.server)) {
+      host = 'https://api-takumi.mihoyo.com/'
+      hostRecord = 'https://api-takumi-record.mihoyo.com/'
+    } else if (['os_usa', 'os_euro', 'os_asia', 'os_cht'].includes(this.server)) {
+      host = 'https://api-os-takumi.mihoyo.com/'
+      hostRecord = 'https://bbs-api-os.mihoyo.com/'
+    }
+    let urlMap = {
+      genshin: {
+        /** 过验证码 */
+        createVerification: {
+          url: `${hostRecord}game_record/app/card/wapi/createVerification`,
+          query: 'is_high=true'
+        },
+        verifyVerification: {
+          url: `${hostRecord}game_record/app/card/wapi/verifyVerification`,
+          body: {
+            "geetest_challenge": data.challenge,
+            "geetest_validate": data.validate,
+            "geetest_seccode": `${data.validate}|jordan`
+          },
+        },
+      },
+      honkaisr: {
+        /** 过验证码 */
+        createVerification: {
+          url: `${hostRecord}game_record/app/card/wapi/createVerification`,
+          query: 'is_high=true'
+        },
+        verifyVerification: {
+          url: `${hostRecord}game_record/app/card/wapi/verifyVerification`,
+          headers: {
+            'x-rpc-challenge_game': '6'
+          },
+          body: {
+            "geetest_challenge": data.challenge,
+            "geetest_validate": data.validate,
+            "geetest_seccode": `${data.validate}|jordan`
+          },
+        },
+      }
+    }
+    return urlMap[this.game]
+  }
+
+  getUrl (type, data = {}) {
+    let urlMap = this.getUrlMap({ ...data, deviceId: this.device })
+    if (!urlMap[type]) return false
+
+    let { url, query = '', body = '' } = urlMap[type]
+
+    if (query) url += `?${query}`
+    if (body) body = JSON.stringify(body)
+
+    let headers = this.getHeaders(query, body)
+
+    return { url, headers, body }
   }
 }

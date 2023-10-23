@@ -45,7 +45,7 @@ export function supportGuoba() {
         {
           field: "blackList",
           label: "黑名单QQ",
-          bottomHelpMessage: "http://api.example.com/geetest?gt={0}&challenge={1}",
+          bottomHelpMessage: "黑名单QQ，可以设置多个，用英文逗号分隔",
           component: "GTags",
           componentProps: {
             placeholder: '请输入黑名单QQ',
@@ -73,7 +73,7 @@ export function supportGuoba() {
       },
       // 设置配置的方法（前端点确定后调用的方法）
       setConfigData(data, { Result }) {
-        xxCfg.saveYaml("api", data)
+        xxCfg.saveYaml("config", data)
         return Result.ok({}, "保存成功~");
       },
     },
