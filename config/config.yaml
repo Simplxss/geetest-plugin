@@ -1,0 +1,10 @@
+# 自动过验证码API地址(如:http://api.example.com/geetest?gt={0}&challenge={1})
+autoAddress: 
+
+# 手动过验证码API地址(如:http://api.example.com/geetest?gt={0}&challenge={1})
+manualAddress: 
+
+# 黑名单QQ号
+blackList:
+  - 10001
+  - 10002
