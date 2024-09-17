@@ -106,11 +106,11 @@ export class bbsVerificationHandler extends plugin {
     let urlMap = {
       ...this.apiTool.getUrlMap({ ...data, deviceId: this.device }),
       createVerification: {
-        url: 'https://api-takumi-record.mihoyo.com/game_record/app/card/wapi/createVerification',
+        url: 'https://bbs-api.miyoushe.com/misc/wapi/createVerification?gids=2&is_high=false',
         query: 'is_high=true'
       },
       verifyVerification: {
-        url: 'https://api-takumi-record.mihoyo.com/game_record/app/card/wapi/verifyVerification',
+        url: 'https://bbs-api.miyoushe.com/misc/wapi/verifyVerfication',
         body: {
           "geetest_challenge": data.challenge,
           "geetest_validate": data.validate,
