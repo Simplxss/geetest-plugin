@@ -106,8 +106,8 @@ export class bbsVerificationHandler extends plugin {
     let urlMap = {
       ...this.apiTool.getUrlMap({ ...data, deviceId: this.device }),
       createVerification: {
-        url: 'https://bbs-api.miyoushe.com/misc/wapi/createVerification?gids=2&is_high=false',
-        query: 'is_high=true'
+        url: 'https://bbs-api.miyoushe.com/misc/wapi/createVerification',
+        query: 'gids=2&is_high=false'
       },
       verifyVerification: {
         url: 'https://bbs-api.miyoushe.com/misc/wapi/verifyVerfication',
